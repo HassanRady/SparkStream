@@ -1,0 +1,58 @@
+# Package Overview
+PACKAGE_NAME: TweetAnalysis
+
+# Names
+PIPELINE_NAME: TweetAnalysis
+PACKAGE_SAVE_FILE: TweetAnalysis_output_v
+DATA_FILE_PATH: data/external/training.1600000.processed.noemoticon.csv
+MODELS_PATH: models/
+
+MODEL_NAME: Model_v1
+TOKENIZER_NAME: Tokenizer_v1.pkl
+CLASSES_NAME: Classes_v1.pkl
+EMBEDDED_MATRIX_NAME: Embedded_matrix_v1.pkl
+
+
+
+# dataset configs
+DATASET_COLUMNS:
+  - sentiment
+  - ids
+  - date
+  - flag
+  - user
+  - text
+DATASET_ENCODING: ISO-8859-1
+
+
+TARGET: sentiment
+NEUTRAL_MIN: 0.4
+NEUTRAL_MAX: 0.7
+CLASSES: 
+  - NEGATIVE
+  - NEUTRAL, 
+  - POSITIVE
+NEGATIVE_INDEX: 0
+NEUTRAL_INDEX: 1
+POSITIVE_INDEX: 2
+
+# To replicate the results
+SEED: 42
+
+# Twitter api tokens and keys
+CONSUMER_KEY: aDvKcFXG3OwhQsTToW19VcwLn
+CONSUMER_SECRET: ZQWVmBXMfTb027IwXKdGibPxve9ZkX8SSOIrRXmInjtjndGOaJ
+ACCESS_TOKEN: 1438163536329560067-QNxot5FDcyDkXgrBwq5BdYwIQL30b7
+ACCESS_SECRET: BYH14v7UHZRXgprM3P4lt6UZgDZ9m738fCwdE0TzfVxEL
+
+# kafka configs
+KAFKA_TOPIC_NAME: tweets_stream
+KAFKA_HOST: localhost:9092
+
+# Model params
+TEST_SIZE: 0.1
+INPUT_LEN: 60
+VOCAB_LEN: 60000
+EMBEDDING_DIMENSIONS: 100
+EPOCHS: 2
+BATCH_SIZE: 1024
