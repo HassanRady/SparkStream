@@ -15,6 +15,6 @@ include TweetAnalysis/config.yml
 include TweetAnalysis/VERSION
 include models/.gitignore
 include data/.gitignore
-include imgs/*
+
 
 

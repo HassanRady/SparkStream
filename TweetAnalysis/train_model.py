@@ -17,12 +17,12 @@ def run_training(save_result: bool = True):
     clean_text = pp.CleanText()
     X_cleaned = clean_text.transform(X)
 
-    print('trainning word embeddings...')
+    print('training word embeddings...')
     embedding_matrix = word_embeddings._Word2Vec().make_embedding_matrix(X_cleaned)
     pipeline.pipe_rnn.named_steps['model'].set_params(
         embedding_matrix=embedding_matrix)
 
-    print('trainning RNN model...')
+    print('training RNN model...')
     pipeline.pipe_rnn.fit(X_cleaned, y)
 
     if save_result:
