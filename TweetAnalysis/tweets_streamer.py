@@ -29,7 +29,9 @@ class StdOutListener(StreamListener):
         try:
             msg = json.loads(data)
             self.producer.send(
-                config.kafka.KAFKA_TOPIC_NAME, value=msg['text'].encode('utf-8'))
+                # config.kafka.KAFKA_TOPIC_NAME, value=msg['text'].encode('utf-8'))
+                config.kafka.KAFKA_TOPIC_NAME, data.encode('utf-8'))
+
             # print( msg['user']['screen_name'].encode('utf-8'), msg['text'].encode('utf-8'))
             # print(msg)
         except BaseException as e:

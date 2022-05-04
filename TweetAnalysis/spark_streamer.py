@@ -3,10 +3,11 @@ import sys
 import time
 import threading
 
-import pyspark.pandas as ps
-
 from pyspark.sql import dataframe, functions as F
 from pyspark.sql import SparkSession
+from pyspark.sql.functions import col
+from pyspark.sql.types import StringType, DoubleType, StructType, StructField
+
 
 from TweetAnalysis.config.core import config
 from TweetAnalysis.config import logging_config
@@ -20,20 +21,6 @@ _logger = logging_config.get_logger(__name__)
 os.environ['PYSPARK_SUBMIT_ARGS'] = '--packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.2 pyspark-shell'
 os.environ['PYSPARK_PYTHON'] = sys.executable
 os.environ['PYSPARK_DRIVER_PYTHON'] = sys.executable
-
-
-urlPattern = r"((http://)[^ ]*|(https://)[^ ]*|(www\.)[^ ]*)"
-userPattern = '@[^\s]+'
-hashtagPattern = '#[^\s]+'
-alphaPattern = "[^a-z0-9<>]"
-sequencePattern = r"(.)\1\1+"
-seqReplacePattern = r"\1\1"
-
-# Defining regex for emojis
-smileemoji = r"[8:=;]['`\-]?[)d]+"
-sademoji = r"[8:=;]['`\-]?\(+"
-neutralemoji = r"[8:=;]['`\-]?[\/|l*]"
-lolemoji = r"[8:=;]['`\-]?p+"
 
 class SparkStreamer(object):
     def __init__(self):
@@ -55,25 +42,10 @@ class SparkStreamer(object):
             .option("subscribe", config.kafka.KAFKA_TOPIC_NAME) \
             .load()
 
-        df = df.selectExpr("CAST(key AS STRING)", "CAST(value AS string)")
-        df = df.withColumn('tweet', df['value'])
+        df = df.selectExpr("CAST(value AS string)")
+        schema = StructType([StructField('text', StringType()), StructField('created_at', StringType()), StructField('id', StringType()), StructField('user', StringType())])
 
-        df = df.withColumn('value', F.regexp_replace(
-            'value', userPattern, '<user>'))
-        df = df.withColumn('value', F.regexp_replace('value', 'RT', ''))
-        df = df.withColumn('value', F.regexp_replace('value', urlPattern, '<url>'))
-        df = df.withColumn('value', F.regexp_replace(
-            'value', smileemoji, '<smile>'))
-        df = df.withColumn('value', F.regexp_replace(
-            'value', sademoji, '<sadface>'))
-        df = df.withColumn('value', F.regexp_replace(
-            'value', neutralemoji, '<neutralface>'))
-        df = df.withColumn('value', F.regexp_replace(
-            'value', lolemoji, '<lolface>'))
-        df = df.withColumn('value', F.regexp_replace(
-            'value', sequencePattern, seqReplacePattern))
-        df = df.withColumn('value', F.regexp_replace('value', userPattern, ''))
-        df = df.withColumn('value', F.regexp_replace('value', r'/', ' / '))
+        df = df.select(F.from_json(col('value'), schema).alias('data')).select("data.*")
 
         return df
 
@@ -104,7 +76,7 @@ class SparkStreamer(object):
 
     def get_stream_data(self, wait=0, stop=True):
         time.sleep(wait)
-        pdf = self.__spark.sql("""select * from streamTable""").toPandas()
+        pdf = self.__spark.sql("""select * from streamTable""")#.toPandas()
         if stop:
             try:
                 self.stream.stop()
