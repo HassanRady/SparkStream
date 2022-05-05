@@ -49,7 +49,7 @@ class SparkStreamer(object):
 
         user_schema = ArrayType(
                             StructType([
-                                StructField('id', StringType()),
+                                StructField('user_id', StringType()),
                                 StructField('name', StringType(), True),
                                 StructField('screen_name', StringType()),
                                 StructField('location', StringType()),
@@ -60,6 +60,7 @@ class SparkStreamer(object):
         df = df.select(F.from_json(col('value'), schema).alias(
             'data')).select("data.*")
         df = df.withColumn('user', F.from_json(col('user'), user_schema))
+        df = df.select('text', 'created_at', 'id', 'user.id', 'user.name', 'user.screen_name', 'user.location', 'user.followers_count', 'user.friends_count')
         return df
 
     def write_stream_to_memory(self, df):

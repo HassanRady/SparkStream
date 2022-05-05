@@ -40,10 +40,7 @@ POSITIVE_INDEX: 2
 SEED: 42
 
 # Twitter api tokens and keys
-CONSUMER_KEY: 
-CONSUMER_SECRET: 
-ACCESS_TOKEN: 
-ACCESS_SECRET: 
+
 
 # kafka configs
 KAFKA_TOPIC_NAME: tweets_stream
