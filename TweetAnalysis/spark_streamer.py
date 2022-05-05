@@ -45,22 +45,18 @@ class SparkStreamer(object):
 
         schema = StructType([StructField('text', StringType()), StructField('created_at', StringType()),
                              StructField('id', StringType()),
-                             StructField('user', StringType())])
-
-        user_schema = ArrayType(
-                            StructType([
-                                StructField('user_id', StringType()),
+                             StructField('user', StructType([
+                                StructField('id', StringType()),
                                 StructField('name', StringType(), True),
                                 StructField('screen_name', StringType()),
                                 StructField('location', StringType()),
                                 StructField('followers_count', StringType()),
                                 StructField('friends_count',StringType()),
-                            ]))
+                            ]))])
 
         df = df.select(F.from_json(col('value'), schema).alias(
             'data')).select("data.*")
-        df = df.withColumn('user', F.from_json(col('user'), user_schema))
-        df = df.select('text', 'created_at', 'id', 'user.id', 'user.name', 'user.screen_name', 'user.location', 'user.followers_count', 'user.friends_count')
+        df = df.select('text', 'created_at', 'id', col('user.id').alias('user_id'), 'user.name', 'user.screen_name', 'user.location', 'user.followers_count', 'user.friends_count')
         return df
 
     def write_stream_to_memory(self, df):
