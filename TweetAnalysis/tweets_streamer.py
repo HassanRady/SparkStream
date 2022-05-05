@@ -3,9 +3,6 @@ from tweepy.streaming import StreamListener
 from tweepy import Stream
 from kafka import KafkaProducer
 
-import json
-import sys
-
 from TweetAnalysis.config.core import config
 from TweetAnalysis.config import logging_config
 
@@ -27,13 +24,9 @@ class StdOutListener(StreamListener):
 
     def on_data(self, data):
         try:
-            msg = json.loads(data)
             self.producer.send(
-                # config.kafka.KAFKA_TOPIC_NAME, value=msg['text'].encode('utf-8'))
                 config.kafka.KAFKA_TOPIC_NAME, data.encode('utf-8'))
-
-            # print( msg['user']['screen_name'].encode('utf-8'), msg['text'].encode('utf-8'))
-            # print(msg)
+            # print(data)
         except BaseException as e:
             _logger.warning("Error on_data: %s" % str(e))
         return True
