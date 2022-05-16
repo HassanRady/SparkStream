@@ -6,7 +6,7 @@ import copy
 
 from pyspark.sql import dataframe, functions as F
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col
+from pyspark.sql.functions import col, lit
 from pyspark.sql.types import StringType, StructType, StructField, ArrayType
 
 
@@ -114,6 +114,7 @@ class SparkStreamer(object):
         thread.start()
 
         df = self.connect_to_kafka_stream()
+        df = df.withColumn('topic', lit(self.topic))
 
         self.write_stream_to_memory(df)
         self.write_stream_to_cassandra(df)

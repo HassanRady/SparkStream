@@ -13,7 +13,7 @@ python-dotenv>=0.5.1
 # backwards compatibility
 pathlib2
 
-
+langid
 nltk
 gensim
 pandas
