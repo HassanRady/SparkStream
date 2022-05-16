@@ -49,6 +49,9 @@ ACCESS_SECRET: CHJSHbZADSfMJ0Zi4q54DLDJEohPZkrCosQjkh3VWOe0F
 KAFKA_TOPIC_NAME: tweets_stream
 KAFKA_HOST: localhost:9092
 
+# cassandra configs
+CASSANDRA_HOST: localhost:9042
+
 # Model params
 TEST_SIZE: 0.1
 INPUT_LEN: 60

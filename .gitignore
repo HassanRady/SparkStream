@@ -193,5 +193,5 @@ cython_debug/
 test.py
 *.log
 logs.*
-
+checkpoint/
 # End of https://www.toptal.com/developers/gitignore/api/python,visualstudiocode

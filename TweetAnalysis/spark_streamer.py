@@ -2,6 +2,7 @@ import os
 import sys
 import time
 import threading
+import copy
 
 from pyspark.sql import dataframe, functions as F
 from pyspark.sql import SparkSession
@@ -27,7 +28,7 @@ class SparkStreamer(object):
     def __init__(self):
         self.__spark = SparkSession.builder.master("local[1]").appName("tweets reader")\
             .config("spark.some.config.option", "some-value")\
-            .config("spark.cassandra.connection.host","localhost:9042")\
+            .config("spark.cassandra.connection.host", config.cassandra.CASSANDRA_HOST)\
             .getOrCreate()
         self.topic = None
         
@@ -93,22 +94,15 @@ class SparkStreamer(object):
             .start() 
         return self.stream
 
-    def write_stream_to_cassandra(self, df, keyspace='twitter', table='tweets',):
+    def write_stream_to_cassandra(self, df, keyspace='tweetsstream', table='tweets',):
         """writing the tweets stream to cassandra"""
         _logger.info(f'writing {self.topic} tweets stream to cassandra...')
 
-        df = df.copy()
-        def _cassandra_connect(*args, **kwargs):
-            df.write \
-            .format("org.apache.spark.sql.cassandra") \
-            .options(table=table, keyspace=keyspace) \
-            .mode("update") \
-            .save()
-        
+        df = df.alias('other')
         df.writeStream\
-        .trigger(processingTime='5 seconds')\
-        .outputMode('update')\
-        .foreachBatch(_cassandra_connect)\
+        .format("org.apache.spark.sql.cassandra") \
+        .options(table=table, keyspace=keyspace) \
+        .option("checkpointLocation", 'checkpoint/') \
         .start()
 
 
@@ -122,7 +116,7 @@ class SparkStreamer(object):
         df = self.connect_to_kafka_stream()
 
         self.write_stream_to_memory(df)
-        # self.write_stream_to_cassandra(df)
+        self.write_stream_to_cassandra(df)
 
     def get_stream_data(self, wait=0, stop=True, ):
         time.sleep(wait)

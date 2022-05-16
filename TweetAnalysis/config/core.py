@@ -50,6 +50,12 @@ class KafkaConfig(BaseModel):
     KAFKA_TOPIC_NAME: str
     KAFKA_HOST: str
 
+class CassandraConfig(BaseModel):
+    """
+    Cassandra-level config.
+    """
+
+    CASSANDRA_HOST: str
 
 class ModelConfig(BaseModel):
     """
@@ -78,6 +84,7 @@ class Config(BaseModel):
     app: AppConfig
     twitter: TwitterConfig
     kafka: KafkaConfig
+    cassandra: CassandraConfig
     model: ModelConfig
 
 
@@ -111,6 +118,7 @@ def create_and_validate_config(parsed_config: YAML = None) -> Config:
         app=AppConfig(**parsed_config.data),
         twitter=TwitterConfig(**parsed_config.data),
         kafka=KafkaConfig(**parsed_config.data),
+        cassandra=CassandraConfig(**parsed_config.data),
         model=ModelConfig(**parsed_config.data),
     )
 
