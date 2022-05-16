@@ -18,7 +18,7 @@ _logger = logging_config.get_logger(__name__)
 
 
 # env variables for spark and kafka
-os.environ['PYSPARK_SUBMIT_ARGS'] = '--packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.2 pyspark-shell'
+os.environ['PYSPARK_SUBMIT_ARGS'] = '--packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.2,com.datastax.spark:spark-cassandra-connector_2.12:3.2.0 --conf spark.sql.extensions=com.datastax.spark.connector.CassandraSparkExtensions pyspark-shell'
 os.environ['PYSPARK_PYTHON'] = sys.executable
 os.environ['PYSPARK_DRIVER_PYTHON'] = sys.executable
 
@@ -27,7 +27,11 @@ class SparkStreamer(object):
     def __init__(self):
         self.__spark = SparkSession.builder.master("local[1]").appName("tweets reader")\
             .config("spark.some.config.option", "some-value")\
+            .config("spark.cassandra.connection.host","localhost:9042")\
             .getOrCreate()
+        self.topic = None
+        
+        
 
     def connect_to_kafka_stream(self) -> dataframe:
         """reading stream from kafka"""
@@ -62,33 +66,71 @@ class SparkStreamer(object):
     def write_stream_to_memory(self, df):
         """writing the tweets stream to memory"""
 
-        _logger.info('writing the tweets stream to memory...')
+        _logger.info(f'writing {self.topic} tweets stream to memory...')
 
         self.stream = df.writeStream \
-            .trigger(processingTime='1 seconds') \
+            .trigger(processingTime='3 seconds') \
             .option("truncate", "false") \
             .format('memory') \
             .outputMode("append") \
-            .queryName('streamTable') \
-            .start()  # .awaitTermination()
+            .queryName(self.topic) \
+            .start()
         return self.stream
 
+    def write_stream_to_csv(self, df, path='stream/', checkpoint='checkpoint/', ):
+        """writing the tweets stream to csv"""
+        _logger.info(f'writing {self.topic} tweets stream to csv...')
+
+        df = df.copy()
+        self.stream = df.writeStream \
+            .trigger(processingTime='3 seconds') \
+            .option("truncate", "false") \
+            .format('csv') \
+            .option("path", path) \
+            .option("checkpointLocation", checkpoint) \
+            .outputMode("append") \
+            .queryName(self.topic) \
+            .start() 
+        return self.stream
+
+    def write_stream_to_cassandra(self, df, keyspace='twitter', table='tweets',):
+        """writing the tweets stream to cassandra"""
+        _logger.info(f'writing {self.topic} tweets stream to cassandra...')
+
+        df = df.copy()
+        def _cassandra_connect(*args, **kwargs):
+            df.write \
+            .format("org.apache.spark.sql.cassandra") \
+            .options(table=table, keyspace=keyspace) \
+            .mode("update") \
+            .save()
+        
+        df.writeStream\
+        .trigger(processingTime='5 seconds')\
+        .outputMode('update')\
+        .foreachBatch(_cassandra_connect)\
+        .start()
+
+
     def start_stream(self, topic, stop=True):
+        self.topic = topic
+        _logger.info(f'starting stream on topic {topic}')
         thread = threading.Thread(target=get_stream, kwargs={
                                   'topic': topic}, daemon=stop)
         thread.start()
 
         df = self.connect_to_kafka_stream()
 
-        stream = self.write_stream_to_memory(df)
+        self.write_stream_to_memory(df)
+        # self.write_stream_to_cassandra(df)
 
-    def get_stream_data(self, wait=0, stop=True):
+    def get_stream_data(self, wait=0, stop=True, ):
         time.sleep(wait)
-        pdf = self.__spark.sql("""select * from streamTable""")  # .toPandas()
+        pdf = self.__spark.sql(f"""select * from {self.topic}""") 
         if stop:
             try:
                 self.stream.stop()
-                self.__spark.stop()
+                # self.__spark.stop()
                 _logger.info('spark stopped')
             except BaseException as e:
                 _logger.warning(f"Error: {e}")
