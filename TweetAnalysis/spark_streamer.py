@@ -1,8 +1,6 @@
-import os
-import sys
 import time
 import threading
-import copy
+import uuid
 
 from pyspark.sql import dataframe, functions as F
 from pyspark.sql import SparkSession
@@ -58,7 +56,7 @@ class SparkStreamer(object):
 
         df = df.select(F.from_json(col('value'), schema).alias(
             'data')).select("data.*")
-        df = df.select('text', 'created_at', 'id', col('user.id').alias('user_id'), 'user.name', 'user.screen_name', 'user.location', 'user.followers_count', 'user.friends_count')
+        df = df.select('text', 'created_at', col('id').alias('tweet_id'), col('user.id').alias('user_id'), 'user.name', 'user.screen_name', 'user.location', 'user.followers_count', 'user.friends_count')
         return df
 
     def write_stream_to_memory(self, df):
@@ -96,6 +94,9 @@ class SparkStreamer(object):
         _logger.info(f'writing {self.topic} tweets stream to cassandra...')
 
         df = df.alias('other')
+        # ud = uuid.uuid1()
+        df = df.withColumn('id', F.expr("uuid()"))
+
         df.writeStream\
         .format("org.apache.spark.sql.cassandra") \
         .options(table=table, keyspace=keyspace) \
