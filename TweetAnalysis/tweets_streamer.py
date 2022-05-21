@@ -1,4 +1,5 @@
 import threading 
+import os
 
 from tweepy import OAuthHandler
 from tweepy.streaming import StreamListener
@@ -11,10 +12,10 @@ from TweetAnalysis.config import logging_config
 
 _logger = logging_config.get_logger(__name__)
 
-consumer_key = config.twitter.CONSUMER_KEY
-consumer_secret = config.twitter.CONSUMER_SECRET
-access_token = config.twitter.ACCESS_TOKEN
-access_secret = config.twitter.ACCESS_SECRET
+consumer_key = os.environ['TWITTER_CONSUMER_KEY']
+consumer_secret = os.environ['TWITTER_CONSUMER_SECRET']
+access_token = os.environ['TWITTER_ACCESS_TOKEN']
+access_secret = os.environ['TWITTER_ACCESS_SECRET']
 
 
 class StdOutListener(StreamListener):

@@ -36,11 +36,6 @@ class TwitterConfig(BaseModel):
     Twitter-level config.
     """
 
-    CONSUMER_KEY: str
-    CONSUMER_SECRET: str
-    ACCESS_TOKEN: str
-    ACCESS_SECRET: str
-
 
 class KafkaConfig(BaseModel):
     """
