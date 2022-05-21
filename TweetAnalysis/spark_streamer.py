@@ -121,8 +121,4 @@ class SparkStreamer(object):
 
 
 if __name__ == '__main__':
-    ss = SparkStreamer()
-    ss.start_stream('music', True)
-    zz = ss.get_stream_data(4, True)
-    print(zz.shape)
-    print(zz)
+    pass

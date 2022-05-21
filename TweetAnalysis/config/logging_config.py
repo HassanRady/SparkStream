@@ -1,6 +1,7 @@
 import logging
 from logging import handlers
 import sys
+import os
 
 from TweetAnalysis.config.core import PACKAGE_ROOT
 
@@ -16,7 +17,7 @@ def get_console_handler():
 
 
 def get_file_handler():
-    file_handler = logging.handlers.TimedRotatingFileHandler(PACKAGE_ROOT / "logs.log")
+    file_handler = logging.handlers.TimedRotatingFileHandler(os.getcwd() + "/logs.log")
     file_handler.setFormatter(FORMATTER)
     return file_handler
 
