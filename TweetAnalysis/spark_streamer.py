@@ -1,22 +1,15 @@
 import time
-import threading
-import uuid
 
 from pyspark.sql import dataframe, functions as F
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, lit
 from pyspark.sql.types import StringType, StructType, StructField, ArrayType
 
-
 from TweetAnalysis.config.core import config
 from TweetAnalysis.config import logging_config
-from TweetAnalysis.tweets_streamer import get_stream
 
 
 _logger = logging_config.get_logger(__name__)
-
-
-
 
 
 class SparkStreamer(object):
@@ -26,8 +19,6 @@ class SparkStreamer(object):
             .config("spark.cassandra.connection.host", config.cassandra.CASSANDRA_HOST)\
             .getOrCreate()
         self.topic = None
-        
-        
 
     def connect_to_kafka_stream(self) -> dataframe:
         """reading stream from kafka"""
@@ -46,17 +37,18 @@ class SparkStreamer(object):
         schema = StructType([StructField('text', StringType()), StructField('created_at', StringType()),
                              StructField('id', StringType()),
                              StructField('user', StructType([
-                                StructField('id', StringType()),
-                                StructField('name', StringType(), True),
-                                StructField('screen_name', StringType()),
-                                StructField('location', StringType()),
-                                StructField('followers_count', StringType()),
-                                StructField('friends_count',StringType()),
-                            ]))])
+                                 StructField('id', StringType()),
+                                 StructField('name', StringType(), True),
+                                 StructField('screen_name', StringType()),
+                                 StructField('location', StringType()),
+                                 StructField('followers_count', StringType()),
+                                 StructField('friends_count', StringType()),
+                             ]))])
 
         df = df.select(F.from_json(col('value'), schema).alias(
             'data')).select("data.*")
-        df = df.select('text', 'created_at', col('id').alias('tweet_id'), col('user.id').alias('user_id'), 'user.name', 'user.screen_name', 'user.location', 'user.followers_count', 'user.friends_count')
+        df = df.select('text', 'created_at', col('id').alias('tweet_id'), col('user.id').alias(
+            'user_id'), 'user.name', 'user.screen_name', 'user.location', 'user.followers_count', 'user.friends_count')
         return df
 
     def write_stream_to_memory(self, df):
@@ -86,7 +78,7 @@ class SparkStreamer(object):
             .option("checkpointLocation", checkpoint) \
             .outputMode("append") \
             .queryName(self.topic) \
-            .start() 
+            .start()
         return self.stream
 
     def write_stream_to_cassandra(self, df, keyspace='tweetsstream', table='tweets',):
@@ -94,22 +86,17 @@ class SparkStreamer(object):
         _logger.info(f'writing {self.topic} tweets stream to cassandra...')
 
         df = df.alias('other')
-        # ud = uuid.uuid1()
         df = df.withColumn('id', F.expr("uuid()"))
 
         df.writeStream\
-        .format("org.apache.spark.sql.cassandra") \
-        .options(table=table, keyspace=keyspace) \
-        .option("checkpointLocation", 'checkpoint/') \
-        .start()
+            .format("org.apache.spark.sql.cassandra") \
+            .options(table=table, keyspace=keyspace) \
+            .option("checkpointLocation", 'checkpoint/') \
+            .start()
 
-
-    def start_stream(self, topic, stop=True):
+    def start_spark_stream(self, topic, ):
         self.topic = topic
         _logger.info(f'starting stream on topic {topic}')
-        thread = threading.Thread(target=get_stream, kwargs={
-                                  'topic': topic}, daemon=stop)
-        thread.start()
 
         df = self.connect_to_kafka_stream()
         df = df.withColumn('topic', lit(self.topic))
@@ -117,16 +104,19 @@ class SparkStreamer(object):
         self.write_stream_to_memory(df)
         self.write_stream_to_cassandra(df)
 
-    def get_stream_data(self, wait=0, stop=True, ):
+    def stop_stream(self):
+        try:
+            self.stream.stop()
+            _logger.info('spark stream stopped')
+        except BaseException as e:
+            _logger.warning(f"Error: {e}")
+
+    def get_stream_data(self, wait=0, ):
+        """getting the tweets stream data"""
+        _logger.info(f'getting {self.topic} tweets stream data...')
         time.sleep(wait)
-        pdf = self.__spark.sql(f"""select * from {self.topic}""") 
-        if stop:
-            try:
-                self.stream.stop()
-                # self.__spark.stop()
-                _logger.info('spark stopped')
-            except BaseException as e:
-                _logger.warning(f"Error: {e}")
+        pdf = self.__spark.sql(f"""select * from {self.topic}""")
+
         return pdf
 
 
