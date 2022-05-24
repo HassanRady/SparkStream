@@ -3,7 +3,7 @@ import time
 from pyspark.sql import dataframe, functions as F
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, lit
-from pyspark.sql.types import StringType, StructType, StructField, ArrayType
+from pyspark.sql.types import StringType, StructType, StructField
 
 from TweetAnalysis.config.core import config
 from TweetAnalysis.config import logging_config
@@ -18,6 +18,7 @@ class SparkStreamer(object):
             .config("spark.some.config.option", "some-value")\
             .config("spark.cassandra.connection.host", config.cassandra.CASSANDRA_HOST)\
             .getOrCreate()
+        self.__spark.sparkContext.setLogLevel("ERROR")
         self.topic = None
 
     def connect_to_kafka_stream(self) -> dataframe:
@@ -30,6 +31,7 @@ class SparkStreamer(object):
             .format("kafka") \
             .option("kafka.bootstrap.servers", config.kafka.KAFKA_HOST) \
             .option("subscribe", config.kafka.KAFKA_TOPIC_NAME) \
+            .option('failOnDataLoss', 'false') \
             .load()
 
         df = df.selectExpr("CAST(value AS string)")
