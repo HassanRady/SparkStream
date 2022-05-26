@@ -1,19 +1,23 @@
-import os
-from pathlib import Path
 from scipy.special import softmax
 import pandas as pd
 
 from transformers import TFAutoModelForSequenceClassification
 from transformers import AutoTokenizer, AutoConfig
 
+from TweetAnalysis.config import logging_config 
 
-
-
+_logger = logging_config.get_logger(__name__)
 
 
 class SentimentPredictor:
-    def __init__(self, model_name='twitter-xlm-roberta-base-sentiment'):
-        model_path= Path(os.getcwd()).parent.parent.joinpath(model_name)
+    def __init__(self, model_path='F:\Big Projects\Twitter Analysis\\twitter-xlm-roberta-base-sentiment'):
+        """ 
+        Initialize the predictor.
+        Args:
+            model_path (str, optional): path to local model . Defaults to 'F:\Big Projects\Twitter Analysis\twitter-xlm-roberta-base-sentiment'.
+        """
+        _logger.info(f"Loading model {model_path}")
+
         MODEL = model_path
         self.tokenizer = AutoTokenizer.from_pretrained(MODEL)
         self.config = AutoConfig.from_pretrained(MODEL)
@@ -29,6 +33,9 @@ class SentimentPredictor:
         return " ".join(new_text)
     
     def predict(self, X: pd.Series):
+
+        _logger.info(f"Predicting sentiment for {len(X)} tweets")
+
         df = pd.DataFrame({'tweet': X})
         df['text'] = df['tweet'].apply(lambda x: self._preprocess(x))
         encoded_inputs = self.tokenizer.batch_encode_plus(df['text'].tolist(), max_length=self.config.max_length, padding=True, return_tensors='tf')
@@ -38,6 +45,8 @@ class SentimentPredictor:
         df_preds = pd.DataFrame(scores, columns=list(self.config.id2label.values()))
         df_preds['label'] = df_preds.idxmax(axis=1)
         df = pd.concat([df, df_preds], axis=1)
+
+        _logger.info(f"Prediction complete")
         return df
 
 
