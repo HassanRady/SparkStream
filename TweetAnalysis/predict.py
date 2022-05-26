@@ -14,6 +14,7 @@ print("pipeline loading...")
 tokenizer = joblib.load(config.app.MODELS_PATH + config.app.TOKENIZER_NAME)
 model = load_model(config.app.MODELS_PATH + config.app.MODEL_NAME)
 
+
 def get_label(proba):
 
     if proba <= config.model.NEUTRAL_MIN:
@@ -24,9 +25,9 @@ def get_label(proba):
         return config.model.NEUTRAL_INDEX
 
 
-def make_bulk_prediction(X: pd.Series, clean=False) -> list:
+def make_bulk_prediction(X: pd.Series, X2, clean=False) -> list:
     """Make multiple predictions using the saved model pipeline"""
-    tweets, tweets_regx = X['tweet'], X['value']
+    tweets, tweets_regx = X, X2
 
     if clean:
         X = pp.CleanText().transform(tweets_regx)
@@ -38,11 +39,10 @@ def make_bulk_prediction(X: pd.Series, clean=False) -> list:
     X = pp.PaddingText().transform(X)
     predictions = model.predict(X)
 
-
     classes = [config.model.CLASSES[int(get_label(p))] for p in predictions]
 
-    
-    df = pd.DataFrame({'Tweet': tweets, 'Class': classes, 'Probability': predictions.ravel()})
+    df = pd.DataFrame({'Tweet': tweets, 'Class': classes,
+                      'Probability': predictions.ravel()})
 
     print('prediction done!!!')
     return df

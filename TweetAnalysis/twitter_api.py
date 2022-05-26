@@ -20,7 +20,7 @@ access_secret = os.environ['TWITTER_ACCESS_SECRET']
 auth = OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_token, access_secret)
 
-class __StdOutListener(StreamListener):
+class StdOutListener(StreamListener):
     """Listener class for the tweets stream"""
 
     def __init__(self, producer):
@@ -53,7 +53,7 @@ class TweetStreamer(object):
         _logger.info('tweets streaming...')
         global stream
         producer = KafkaProducer(bootstrap_servers=config.kafka.KAFKA_HOST)
-        l = __StdOutListener(producer)
+        l = StdOutListener(producer)
         stream = Stream(auth, l)
         stream.filter(track=[topic], languages=['en'])
         return None
@@ -80,13 +80,13 @@ class TweetStreamer(object):
 class Tweets(object):
     """Tweets class"""
     def __init__(self, ):
-        self.api = API(auth)
+        self.api = API(auth, wait_on_rate_limit=True,)
 
-    def get_trending_hashtags(self):
+    def get_trending_hashtags(self, WOEID=1):
         """getting the trending hashtags"""
 
         _logger.info('getting the trending hashtags...')
-        tags = self.api.trends_place(1)
+        tags = self.api.trends_place(WOEID)
         return tags
 
 

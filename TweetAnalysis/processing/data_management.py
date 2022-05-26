@@ -53,13 +53,16 @@ def load_pipeline_keras() -> Pipeline:
     """Load a Keras Pipeline from disk."""
 
     print('loading tokenizer...')
-    TokenizeText = joblib.load(config.app.MODELS_PATH + config.app.TOKENIZER_NAME)
+    TokenizeText = joblib.load(
+        config.app.MODELS_PATH + config.app.TOKENIZER_NAME)
 
     # print('loading word embeddings...')
     # embedding_matrix = joblib.load(config.EMBEDDING_MATRIX_PATH)
 
     print('loading RNN model...')
-    def build_model(): return load_model(config.app.MODELS_PATH + config.app.MODEL_NAME)
+
+    def build_model(): return load_model(
+        config.app.MODELS_PATH + config.app.MODEL_NAME)
     classifier = KerasClassifier(build_fn=build_model,
                                  batch_size=config.model.BATCH_SIZE,
                                  validation_split=0.1,
@@ -68,7 +71,8 @@ def load_pipeline_keras() -> Pipeline:
                                  callbacks=m.callbacks,
                                  #  embedding_matrix=embedding_matrix
                                  )
-    classifier.classes_ = joblib.load(config.app.MODELS_PATH + config.app.CLASSES_NAME)
+    classifier.classes_ = joblib.load(
+        config.app.MODELS_PATH + config.app.CLASSES_NAME)
     classifier.model = build_model()
 
     return Pipeline([
