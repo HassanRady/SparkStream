@@ -27,3 +27,5 @@ tweepy==3.9.0
 pydantic
 strictyaml
 joblib
+transformers
+sentencepiece
