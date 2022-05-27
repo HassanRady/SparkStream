@@ -9,12 +9,12 @@ from TweetAnalysis.config import logging_config
 _logger = logging_config.get_logger(__name__)
 
 
-class SentimentPredictor:
-    def __init__(self, model_path='F:\Big Projects\Twitter Analysis\\twitter-xlm-roberta-base-sentiment'):
+class EmotionPredictor:
+    def __init__(self, model_path='F:\Big Projects\Twitter Analysis\\twitter-xlm-roberta-base-emotion'):
         """ 
         Initialize the predictor.
         Args:
-            model_path (str, optional): path to local model . Defaults to 'F:\Big Projects\Twitter Analysis\twitter-xlm-roberta-base-sentiment'.
+            model_path (str, optional): path to local model . Defaults to 'F:\Big Projects\Twitter Analysis\twitter-xlm-roberta-base-emotion'.
         """
         _logger.info(f"Loading model {model_path}")
 
@@ -29,12 +29,13 @@ class SentimentPredictor:
         for t in text.split(" "):
             t = '@user' if t.startswith('@') and len(t) > 1 else t
             t = 'http' if t.startswith('http') else t
+            t = '' if t == 'RT' else t
             new_text.append(t)
         return " ".join(new_text)
     
     def predict(self, X: pd.Series):
 
-        _logger.info(f"Predicting sentiment for {len(X)} tweets")
+        _logger.info(f"Predicting emotion for {len(X)} tweets")
 
         df = pd.DataFrame({'tweet': X})
         df['text'] = df['tweet'].apply(lambda x: self._preprocess(x))

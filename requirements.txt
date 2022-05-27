@@ -20,12 +20,14 @@ pandas
 pyspark
 kafka-python
 streamlit
-scikit-learn
 seaborn
-tensorflow
 tweepy==3.9.0
 pydantic
 strictyaml
 joblib
 transformers
 sentencepiece
+
+
+-f https://download.pytorch.org/whl/cu113/torch_stable.html
+torch==1.11.0+cu113
