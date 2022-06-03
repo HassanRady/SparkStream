@@ -17,6 +17,8 @@ include models/.gitignore
 include data/.gitignore
 include TweetAnalysis/Kafka
 include TweetAnalysis/Spark
+include TweetAnalysis/Kafka/*
+include TweetAnalysis/Spark/*
 
 
 
