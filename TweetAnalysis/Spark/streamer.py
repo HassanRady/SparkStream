@@ -85,7 +85,7 @@ class SparkStreamer(object):
             .start()
         return self.stream
 
-    def write_stream_to_cassandra(self, df, keyspace='twitter', table='tweets',):
+    def write_stream_to_cassandra(self, df, keyspace=config.cassandra.CASSANDRA_KEYSPACE, table=config.cassandra.CASSANDRA_TABLE,):
         """writing the tweets stream to cassandra"""
         _logger.info(f'writing {self.topic} tweets stream to cassandra...')
 

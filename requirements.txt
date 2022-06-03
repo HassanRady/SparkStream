@@ -12,7 +12,7 @@ python-dotenv
 
 # backwards compatibility
 pathlib2
-
+PyArrow
 langid
 nltk
 gensim

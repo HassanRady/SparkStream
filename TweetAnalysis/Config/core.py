@@ -12,23 +12,7 @@ ROOT = PACKAGE_ROOT.parent
 CONFIG_FILE_PATH = PACKAGE_ROOT / "config.yml"
 
 
-class AppConfig(BaseModel):
-    """
-    Application-level config.
-    """
 
-    PACKAGE_NAME: str
-    DATA_FILE_PATH: str
-    MODELS_PATH: str
-    # PACKAGE_SAVE_FILE: str
-    SEED: int
-    DATASET_COLUMNS: List[str]
-    DATASET_ENCODING: str
-
-    MODEL_NAME: str
-    TOKENIZER_NAME: str
-    CLASSES_NAME: str
-    EMBEDDED_MATRIX_NAME: str
 
 
 class TwitterConfig(BaseModel):
@@ -49,38 +33,18 @@ class CassandraConfig(BaseModel):
     """
     Cassandra-level config.
     """
-
+    CASSANDRA_SPARK_APP_NAME: str
     CASSANDRA_HOST: str
-
-class ModelConfig(BaseModel):
-    """
-    All configuration relevant to model
-    training and feature engineering.
-    """
-
-    TARGET: str
-    NEUTRAL_MIN: float
-    NEUTRAL_MAX: float
-    CLASSES: List[str]
-    NEGATIVE_INDEX: int
-    NEUTRAL_INDEX: int
-    POSITIVE_INDEX: int
-    TEST_SIZE: float
-    INPUT_LEN: int
-    VOCAB_LEN: int
-    EMBEDDING_DIMENSIONS: int
-    EPOCHS: int
-    BATCH_SIZE: int
+    CASSANDRA_KEYSPACE: str
+    CASSANDRA_TABLE: str
 
 
 class Config(BaseModel):
     """Master config object."""
 
-    app: AppConfig
     twitter: TwitterConfig
     kafka: KafkaConfig
     cassandra: CassandraConfig
-    model: ModelConfig
 
 
 def find_config_file() -> Path:
@@ -110,11 +74,9 @@ def create_and_validate_config(parsed_config: YAML = None) -> Config:
 
     # specify the data attribute from the strictyaml YAML type.
     _config = Config(
-        app=AppConfig(**parsed_config.data),
         twitter=TwitterConfig(**parsed_config.data),
         kafka=KafkaConfig(**parsed_config.data),
         cassandra=CassandraConfig(**parsed_config.data),
-        model=ModelConfig(**parsed_config.data),
     )
 
     return _config

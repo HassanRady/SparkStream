@@ -1,20 +1,12 @@
-import os
-import sys
-import time
-import threading
-
 import pyspark.pandas as ps
 
 from pyspark.sql import dataframe, functions as F
-from pyspark.sql import SparkSession
 from pyspark.sql.functions import udf, col
-from pyspark.sql.types import StringType, DoubleType, DateType, MapType, StructType, StructField
+from pyspark.sql.types import StringType
 
-from TweetAnalysis.Config.core import config
 from TweetAnalysis.Config import logging_config
-from TweetAnalysis.spark_streamer import SparkStreamer
-from TweetAnalysis.text_cleaner import TextCleaner
-from TweetAnalysis.text_processor import TextProcessor
+from TweetAnalysis.Spark.Text.text_cleaner import TextCleaner
+from TweetAnalysis.Spark.Text.text_analyzer import TextProcessor
 
 _logger = logging_config.get_logger(__name__)
 
@@ -47,11 +39,10 @@ def clean(df):
     .withColumn('tagged_text', tag_and_remove_udf(df['feat_text']))
     df = df.select(cols+['tagged_text']) \
     .withColumn('lemm_text', lemmatize_udf(df['tagged_text']))
-    # df=df.select(cols+['lemm_text']).withColumn("is_blank", check_blanks_udf(df["lemm_text"]))
 
     return df
 
 def get_words_count(df, col_name='lemm_text'):
-    dict = tp.word_count(df, col_name)
+    dict = tp.get_word_count(df, col_name)
     return dict
 
