@@ -6,7 +6,7 @@ import os
 
 
 # Package meta-data.
-NAME = 'TweetsAnalysis'
+NAME = 'TweetAnalysis'
 DESCRIPTION = "Real Time Tweets Analysis."
 URL = 'https://github.com/HassanRady/TweetAnalysis'
 EMAIL = 'hassan.khaled.rady@gmail.com'

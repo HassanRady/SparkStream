@@ -1,21 +1,25 @@
 import threading
 import os
+from os.path import join, dirname
+from dotenv import load_dotenv
+dotenv_path = join(dirname(__file__), '.env')
+load_dotenv(dotenv_path)
 
 from tweepy import OAuthHandler
 from tweepy.streaming import StreamListener
 from tweepy import Stream, API
 from kafka import KafkaProducer
 
-from TweetAnalysis.config.core import config
-from TweetAnalysis.config import logging_config
+from TweetAnalysis.Config.core import config
+from TweetAnalysis.Config import logging_config
 
 
 _logger = logging_config.get_logger(__name__)
 
-consumer_key = os.environ['TWITTER_CONSUMER_KEY']
-consumer_secret = os.environ['TWITTER_CONSUMER_SECRET']
-access_token = os.environ['TWITTER_ACCESS_TOKEN']
-access_secret = os.environ['TWITTER_ACCESS_SECRET']
+consumer_key = os.environ['CONSUMER_KEY']
+consumer_secret = os.environ['CONSUMER_SECRET']
+access_token = os.environ['ACCESS_TOKEN']
+access_secret = os.environ['ACCESS_SECRET']
 
 auth = OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_token, access_secret)

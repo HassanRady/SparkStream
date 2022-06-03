@@ -5,8 +5,8 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, lit
 from pyspark.sql.types import StringType, StructType, StructField
 
-from TweetAnalysis.config.core import config
-from TweetAnalysis.config import logging_config
+from TweetAnalysis.Config.core import config
+from TweetAnalysis.Config import logging_config
 
 
 _logger = logging_config.get_logger(__name__)
@@ -51,6 +51,8 @@ class SparkStreamer(object):
             'data')).select("data.*")
         df = df.select('text', 'created_at', col('id').alias('tweet_id'), col('user.id').alias(
             'user_id'), 'user.name', 'user.screen_name', 'user.location', 'user.followers_count', 'user.friends_count')
+
+        _logger.info(f'{self.topic} stream data read from kafka')
         return df
 
     def write_stream_to_memory(self, df):
@@ -83,7 +85,7 @@ class SparkStreamer(object):
             .start()
         return self.stream
 
-    def write_stream_to_cassandra(self, df, keyspace='tweetsstream', table='tweets',):
+    def write_stream_to_cassandra(self, df, keyspace='twitter', table='tweets',):
         """writing the tweets stream to cassandra"""
         _logger.info(f'writing {self.topic} tweets stream to cassandra...')
 
