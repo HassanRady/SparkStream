@@ -7,5 +7,5 @@ KAFKA_HOST: localhost:9092
 CASSANDRA_SPARK_APP_NAME: cassandra reader
 CASSANDRA_HOST: localhost:9042
 CASSANDRA_KEYSPACE: twitter
-CASSANDRA_TABLE: tweets
+CASSANDRA_TABLE: offline_tweets
 
