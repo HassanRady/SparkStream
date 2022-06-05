@@ -37,6 +37,7 @@ class CassandraConfig(BaseModel):
     CASSANDRA_HOST: str
     CASSANDRA_KEYSPACE: str
     CASSANDRA_TABLE: str
+    CASSANDRA_OFFLINE_TABLE: str
 
 
 class Config(BaseModel):

@@ -37,4 +37,15 @@ class CassandraApi(object):
 
         df = df.filter(df.topic == topic)
 
+    def get_offline_data(self):
+        _logger.info('reading data from cassandra...')
+
+        df = self.__spark \
+            .read \
+            .format("org.apache.spark.sql.cassandra") \
+            .options(table=config.cassandra.CASSANDRA_OFFLINE_TABLE, keyspace=config.cassandra.CASSANDRA_KEYSPACE) \
+            .load()
+
+        return df
+
         return df
