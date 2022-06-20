@@ -1,13 +1,17 @@
 from nltk.stem.wordnet import WordNetLemmatizer
-from nltk.corpus import stopwords
 from nltk import pos_tag
 import langid
 import string
 import re
 
+from pyspark.ml.feature import StopWordsRemover 
+from pyspark.sql.functions import udf
+from pyspark.sql.types import StringType
+
 class TextCleaner:
 
     # remove irrelevant features
+    @classmethod
     def remove_features(self, data_str):
         # compile regex
         url_re = re.compile('https?://(www.)?\w+\.\w+(/\w+)*/?')
@@ -15,16 +19,19 @@ class TextCleaner:
         num_re = re.compile('(\\d+)')
         mention_re = re.compile('@(\w+)')
         alpha_num_re = re.compile("^[a-z0-9_.]+$")
+        retweet_re = re.compile('^RT')
         # convert to lowercase
         data_str = data_str.lower()
+        # remove RT
+        data_str = retweet_re.sub('', data_str)
         # remove hyperlinks
-        data_str = url_re.sub(' ', data_str)
+        data_str = url_re.sub('', data_str)
         # remove @mentions
-        data_str = mention_re.sub(' ', data_str)
+        data_str = mention_re.sub('', data_str)
         # remove puncuation
-        data_str = punc_re.sub(' ', data_str)
+        data_str = punc_re.sub('', data_str)
         # remove numeric 'words'
-        data_str = num_re.sub(' ', data_str)
+        data_str = num_re.sub('', data_str)
         # remove non a-z 0-9 characters and words shorter than 3 characters
         list_pos = 0
         cleaned_str = ''
@@ -32,17 +39,15 @@ class TextCleaner:
             if list_pos == 0:
                 if alpha_num_re.match(word) and len(word) > 2:
                     cleaned_str = word
-                else:
-                    cleaned_str = ' '
             else:
                 if alpha_num_re.match(word) and len(word) > 2:
                     cleaned_str = cleaned_str + ' ' + word
-                else:
-                    cleaned_str += ' '
+
             list_pos += 1
         return cleaned_str
 
     # fixed abbreviation
+    @classmethod
     def fix_abbreviation(self, data_str):
         data_str = data_str.lower()
         data_str = re.sub(r'\bthats\b', 'that is', data_str)
@@ -66,17 +71,20 @@ class TextCleaner:
         return data_str
 
     # remove non ASCII characters
+    @classmethod
     def strip_non_ascii(self, data_str):
         ''' Returns the string without non ASCII characters'''
         stripped = (c for c in data_str if 0 < ord(c) < 127)
         return ''.join(stripped)
 
     # check to see if a row only contains whitespace
+    @classmethod
     def check_blanks(self, data_str):
         is_blank = str(data_str.isspace())
         return is_blank
 
     # check the language (only apply to english)
+    @classmethod
     def check_lang(self, data_str):
         from langid.langid import LanguageIdentifier, model
         identifier = LanguageIdentifier.from_modelstring(model, norm_probs=True)
@@ -88,24 +96,17 @@ class TextCleaner:
             language = predict_lang[0]
         return language
 
-    # removes stop words
-    def remove_stops(self, data_str):
-        # expects a string
-        stops = set(stopwords.words("english"))
-        list_pos = 0
-        cleaned_str = ''
-        text = data_str.split()
-        for word in text:
-            if word not in stops:
-                # rebuild cleaned_str
-                if list_pos == 0:
-                    cleaned_str = word
-                else:
-                    cleaned_str = cleaned_str + ' ' + word
-                list_pos += 1
-        return cleaned_str
+
+    @classmethod
+    def remove_stopwords(self, df, col_in, col_out):
+        remover = StopWordsRemover(stopWords=StopWordsRemover.loadDefaultStopWords('english'))
+        remover.setInputCol(col_in)
+        remover.setOutputCol(col_out)
+        return remover.transform(df)
+
 
     # Part-of-Speech Tagging
+    @classmethod
     def tag_and_remove(self, data_str):
         cleaned_str = ' '
         # noun tags
@@ -128,6 +129,7 @@ class TextCleaner:
         return cleaned_str
 
     # lemmatization
+    @classmethod
     def lemmatize(self, data_str):
         # expects a string
         list_pos = 0
@@ -146,3 +148,18 @@ class TextCleaner:
                 cleaned_str = cleaned_str + ' ' + lemma
             list_pos += 1
         return cleaned_str
+
+
+
+
+    ###############################################################################
+
+
+
+strip_non_ascii_udf = udf(TextCleaner.strip_non_ascii, StringType())
+check_blanks_udf = udf(TextCleaner.check_blanks, StringType())
+# check_lang_udf = udf(TextCleaner.check_lang, StringType())
+fix_abbreviation_udf = udf(TextCleaner.fix_abbreviation, StringType())
+remove_features_udf = udf(TextCleaner.remove_features, StringType())
+tag_and_remove_udf = udf(TextCleaner.tag_and_remove, StringType())
+lemmatize_udf = udf(TextCleaner.lemmatize, StringType())

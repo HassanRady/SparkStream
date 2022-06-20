@@ -2,13 +2,12 @@
 
 from setuptools import setup, find_packages
 from pathlib import Path
-import os
 
 
 # Package meta-data.
-NAME = 'TweetsAnalysis'
-DESCRIPTION = "Real Time Tweets Analysis."
-URL = 'https://github.com/HassanRady/TweetAnalysis'
+NAME = 'SparkStream'
+DESCRIPTION = "A simple spark streaming handler."
+URL = 'https://github.com/HassanRady/' + NAME
 EMAIL = 'hassan.khaled.rady@gmail.com'
 AUTHOR = "Hassan Rady"
 REQUIRES_PYTHON = ">=3.6.0"
@@ -17,7 +16,7 @@ REQUIRES_PYTHON = ">=3.6.0"
 about = {}
 ROOT_DIR = Path(__file__).resolve().parent
 REQUIREMENTS = ROOT_DIR/ 'requirements.txt'
-PACKAGE_DIR = ROOT_DIR / 'TweetAnalysis'
+PACKAGE_DIR = ROOT_DIR / 'SparkStream'
 
 with open(PACKAGE_DIR / "VERSION") as f:
     _version = f.read().strip()
@@ -59,7 +58,7 @@ setup(
     license="MIT license",
     include_package_data=True,
     keywords='Tweets',
-    packages=find_packages(include=['TweetAnalysis', 'TweetAnalysis.*']),
+    packages=find_packages(include=[NAME, NAME + '.*']),
     test_suite='tests',
     tests_require=test_requirements,
     zip_safe=False,

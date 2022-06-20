@@ -4,10 +4,10 @@ from typing import Dict, List, Sequence
 from pydantic import BaseModel
 from strictyaml import YAML, load
 
-import TweetAnalysis
+import SparkStream
 
 # Project Directories
-PACKAGE_ROOT = Path(TweetAnalysis.__file__).resolve().parent
+PACKAGE_ROOT = Path(SparkStream.__file__).resolve().parent
 ROOT = PACKAGE_ROOT.parent
 CONFIG_FILE_PATH = PACKAGE_ROOT / "config.yml"
 
@@ -36,14 +36,13 @@ class CassandraConfig(BaseModel):
     CASSANDRA_SPARK_APP_NAME: str
     CASSANDRA_HOST: str
     CASSANDRA_KEYSPACE: str
-    CASSANDRA_TABLE: str
+    CASSANDRA_DUMP_TABLE: str
     CASSANDRA_OFFLINE_TABLE: str
-
+    CASSANDRA_PROCESSED_TABLE: str
 
 class Config(BaseModel):
     """Master config object."""
 
-    twitter: TwitterConfig
     kafka: KafkaConfig
     cassandra: CassandraConfig
 
@@ -75,7 +74,6 @@ def create_and_validate_config(parsed_config: YAML = None) -> Config:
 
     # specify the data attribute from the strictyaml YAML type.
     _config = Config(
-        twitter=TwitterConfig(**parsed_config.data),
         kafka=KafkaConfig(**parsed_config.data),
         cassandra=CassandraConfig(**parsed_config.data),
     )

@@ -1,8 +1,5 @@
-include AUTHORS.rst
-include CONTRIBUTING.rst
-include HISTORY.rst
 include LICENSE
-include README.rst
+include README.md
 
 recursive-include tests *
 recursive-exclude * __pycache__
@@ -13,9 +10,7 @@ recursive-include docs *.rst conf.py Makefile make.bat *.jpg *.png *.gif
 include requirements.txt
 include TweetAnalysis/config.yml
 include TweetAnalysis/VERSION
-include TweetAnalysis/Kafka
 include TweetAnalysis/Spark
-include TweetAnalysis/Kafka/*
 include TweetAnalysis/Spark/*
 include TweetAnalysis/Spark/Text/*
 

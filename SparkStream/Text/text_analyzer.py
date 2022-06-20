@@ -1,7 +1,7 @@
 
 from pyspark.sql.functions import split, explode
 
-class TextProcessor:
+class TextAnalyzer:
 
     def get_word_count(self, df, col_name='lemm_text'):
         """Creates a DataFrame with word counts.

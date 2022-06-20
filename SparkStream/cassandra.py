@@ -1,8 +1,8 @@
 from pyspark.sql import SparkSession
 
 
-from TweetAnalysis.Config.core import config
-from TweetAnalysis.Config import logging_config
+from SparkStream.Config.core import config
+from SparkStream.Config import logging_config
 
 
 _logger = logging_config.get_logger(__name__)
@@ -45,7 +45,5 @@ class CassandraApi(object):
             .format("org.apache.spark.sql.cassandra") \
             .options(table=config.cassandra.CASSANDRA_OFFLINE_TABLE, keyspace=config.cassandra.CASSANDRA_KEYSPACE) \
             .load()
-
-        return df
 
         return df

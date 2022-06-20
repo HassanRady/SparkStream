@@ -3,7 +3,7 @@ from logging import handlers
 import sys
 import os
 
-from TweetAnalysis.Config.core import PACKAGE_ROOT
+from SparkStream.Config.core import PACKAGE_ROOT
 
 FORMATTER = logging.Formatter(
     "%(asctime)s — %(name)s — %(levelname)s — %(funcName)s:%(lineno)d — %(message)s"
