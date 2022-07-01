@@ -103,12 +103,10 @@ class SparkStreamer(object):
         _logger.info(f'cleaning tweets stream data...')
         df = df.withColumn('text', tc.remove_features_udf(df['text']))
         df = df.withColumn('text', tc.fix_abbreviation_udf(df['text']))
-        # df = TextCleaner.remove_stopwords(df, 'text', '_text')
-        # df = df.select(col('_text').alias('text'))
-
-        # df = df.na.drop(subset=['text'])
+        df = df.withColumn('text', tc.remove_stopwords_udf(df['text']))       
         df = df.filter("text != ''")
         return df
+
 
 
 class SparkClient:
@@ -122,13 +120,13 @@ class SparkClient:
         _logger.info(f'starting stream on topic {topic}')
 
         df = self.kafka_df.withColumn('topic', lit(topic))
-        cs = self.spark_streamer.write_stream_to_cassandra(df, topic, table=config.cassandra.CASSANDRA_DUMP_TABLE)
+        # cs = self.spark_streamer.write_stream_to_cassandra(df, topic, table=config.cassandra.CASSANDRA_DUMP_TABLE)
 
-        # df = self.spark_streamer.clean_stream_data(df)
+        df = self.spark_streamer.clean_stream_data(df)
 
         self.memory_stream = self.spark_streamer.write_stream_to_memory(df, topic)
-        # self.cassandra_stream = self.spark_streamer.write_stream_to_cassandra(
-        #     df, topic, table=config.cassandra.CASSANDRA_PROCESSED_TABLE)
+        self.cassandra_stream = self.spark_streamer.write_stream_to_cassandra(
+            df, topic, table=config.cassandra.CASSANDRA_PROCESSED_TABLE)
 
     def stop_spark_stream(self):
         try:

@@ -97,12 +97,22 @@ class TextCleaner:
         return language
 
 
+    # @classmethod
+    # def remove_stopwords(self, df, col_in, col_out):
+    #     remover = StopWordsRemover(stopWords=StopWordsRemover.loadDefaultStopWords('english'))
+    #     remover.setInputCols([col_in])
+    #     remover.setOutputCols([col_out])
+    #     return remover.transform(df)
+
     @classmethod
-    def remove_stopwords(self, df, col_in, col_out):
-        remover = StopWordsRemover(stopWords=StopWordsRemover.loadDefaultStopWords('english'))
-        remover.setInputCol(col_in)
-        remover.setOutputCol(col_out)
-        return remover.transform(df)
+    def remove_stopwords(self, data_str):
+        from nltk.corpus import stopwords
+        stop_words = set(stopwords.words('english'))
+        word_list = data_str.split()
+        filtered_words = [w for w in word_list if not w in stop_words]
+        return ' '.join(filtered_words)
+
+
 
 
     # Part-of-Speech Tagging
@@ -159,6 +169,7 @@ class TextCleaner:
 strip_non_ascii_udf = udf(TextCleaner.strip_non_ascii, StringType())
 check_blanks_udf = udf(TextCleaner.check_blanks, StringType())
 # check_lang_udf = udf(TextCleaner.check_lang, StringType())
+remove_stopwords_udf = udf(TextCleaner.remove_stopwords, StringType())
 fix_abbreviation_udf = udf(TextCleaner.fix_abbreviation, StringType())
 remove_features_udf = udf(TextCleaner.remove_features, StringType())
 tag_and_remove_udf = udf(TextCleaner.tag_and_remove, StringType())
