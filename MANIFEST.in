@@ -8,11 +8,11 @@ recursive-exclude * *.py[co]
 recursive-include docs *.rst conf.py Makefile make.bat *.jpg *.png *.gif
 
 include requirements.txt
-include TweetAnalysis/config.yml
-include TweetAnalysis/VERSION
-include TweetAnalysis/Spark
-include TweetAnalysis/Spark/*
-include TweetAnalysis/Spark/Text/*
+include SparkStream/config.yml
+include SparkStream/VERSION
+include SparkStream/Spark
+include SparkStream/Spark/*
+include SparkStream/Spark/Text/*
 
 
 
