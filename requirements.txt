@@ -1,15 +1,8 @@
-# local package
-# -e .
-
-# external requirements
 click
 Sphinx
 coverage
 awscli
 flake8
-
-
-# backwards compatibility
 pathlib2
 PyArrow
 langid

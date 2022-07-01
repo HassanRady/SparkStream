@@ -10,9 +10,8 @@ recursive-include docs *.rst conf.py Makefile make.bat *.jpg *.png *.gif
 include requirements.txt
 include SparkStream/config.yml
 include SparkStream/VERSION
-include SparkStream/Spark
-include SparkStream/Spark/*
-include SparkStream/Spark/Text/*
+include SparkStream/Text/*
+include SparkStream/Config/*
 
 
 
