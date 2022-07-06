@@ -8,7 +8,7 @@ PyArrow
 langid
 nltk
 pandas
-pyspark
+pyspark==3.2.1
 pydantic
 strictyaml
 joblib

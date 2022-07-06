@@ -16,7 +16,6 @@ class CassandraApi(object):
             .getOrCreate()
 
     def get_all_data(self):
-        _logger.info('reading data from cassandra...')
 
         df = self.__spark \
             .read \
@@ -27,7 +26,6 @@ class CassandraApi(object):
         return df
 
     def get_data_on_topic(self, topic):
-        _logger.info('reading data from cassandra...')
 
         df = self.__spark \
             .read \
@@ -35,10 +33,10 @@ class CassandraApi(object):
             .options(table=config.cassandra.CASSANDRA_TABLE, keyspace=config.cassandra.CASSANDRA_KEYSPACE) \
             .load()
 
-        df = df.filter(df.topic == topic)
+        df = df.filter(df.topic == topic)   
+        return df
 
     def get_offline_data(self):
-        _logger.info('reading data from cassandra...')
 
         df = self.__spark \
             .read \

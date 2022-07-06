@@ -14,13 +14,6 @@ CONFIG_FILE_PATH = PACKAGE_ROOT / "config.yml"
 
 
 
-
-class TwitterConfig(BaseModel):
-    """
-    Twitter-level config.
-    """
-
-
 class KafkaConfig(BaseModel):
     """
     Kafka-level config.
