@@ -12,4 +12,4 @@ pyspark==3.2.1
 pydantic
 strictyaml
 joblib
-
+findspark
