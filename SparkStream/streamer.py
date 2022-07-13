@@ -14,13 +14,14 @@ import SparkStream.utils as utils
 
 _logger = logging_config.get_logger(__name__)
 
+            # .config("spark.cassandra.connection.host", config.cassandra.CASSANDRA_HOST)\
+
 
 class SparkStreamer(object):
     def __init__(self, ):
         self.__spark = SparkSession.builder.master("local[1]").appName("tweets reader")\
             .config("spark.some.config.option", "some-value")\
             .config("spark.streaming.stopGracefullyOnShutdown", "true")\
-            .config("spark.cassandra.connection.host", config.cassandra.CASSANDRA_HOST)\
             .getOrCreate()
         self.__spark.sparkContext.setLogLevel("ERROR")
         self.topic = None
@@ -69,6 +70,19 @@ class SparkStreamer(object):
             .start()
         return stream
 
+    @utils.clean_query_name
+    def write_stream_to_console(self, df, topic):
+        """writing the tweets stream to console"""
+        self.topic = topic
+        stream = df.writeStream \
+            .trigger(processingTime='2 seconds') \
+            .option("truncate", "false") \
+            .format('console') \
+            .outputMode("append") \
+            .queryName(f"""{self.topic}""") \
+            .start()
+        return stream
+
     def write_stream_to_cassandra(self, df, keyspace=config.cassandra.CASSANDRA_KEYSPACE, table=config.cassandra.CASSANDRA_DUMP_TABLE,):
         """writing the tweets stream to cassandra"""
 
@@ -82,8 +96,6 @@ class SparkStreamer(object):
             .options(table=table, keyspace=keyspace) \
             .option("checkpointLocation", checkpoint_dir) \
             .start()
-            # .queryName(f"""writing {topic} to Cassandra""") \
-
 
         return df
 
@@ -113,18 +125,20 @@ class SparkClient:
         self.topic = topic
 
         df = self.kafka_df.withColumn('topic', lit(topic))
-        # cs = self.spark_streamer.write_stream_to_cassandra(df, topic, table=config.cassandra.CASSANDRA_DUMP_TABLE)
 
         df = self.spark_streamer.clean_stream_data(df)
 
-        self.memory_stream = self.spark_streamer.write_stream_to_memory(df, topic=topic)
-        self.cassandra_stream = self.spark_streamer.write_stream_to_cassandra(
-            df, table=config.cassandra.CASSANDRA_OFFLINE_TABLE)
+        self.console_stream = self.spark_streamer.write_stream_to_console(df, topic=topic)
+
+        # self.memory_stream = self.spark_streamer.write_stream_to_memory(df, topic=topic)
+        # self.cassandra_stream = self.spark_streamer.write_stream_to_cassandra(
+        #     df, table=config.cassandra.CASSANDRA_OFFLINE_TABLE)
 
     def stop_spark_stream(self):
         try:
-            self.memory_stream.stop()
-            self.cassandra_stream.stop()
+            self.console_stream.stop()
+            # self.memory_stream.stop()
+            # self.cassandra_stream.stop()
         except BaseException as e:
             _logger.warning(f"Error: {e}")
 
