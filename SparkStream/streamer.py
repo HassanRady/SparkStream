@@ -1,10 +1,10 @@
 import tempfile
+import os
 
 from pyspark.sql import dataframe, functions as F
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, lit
 from pyspark.sql.types import StringType, StructType, StructField
-
 
 from SparkStream.Config.core import config
 from SparkStream.Config import logging_config
@@ -34,7 +34,7 @@ class SparkStreamer(object):
         df = self.__spark \
             .readStream \
             .format("kafka") \
-            .option("kafka.bootstrap.servers", config.kafka.KAFKA_HOST) \
+            .option("kafka.bootstrap.servers", os.environ['KAFKA_HOST']) \
             .option("subscribe", config.kafka.KAFKA_TOPIC_NAME) \
             .option('failOnDataLoss', 'false') \
             .load()
