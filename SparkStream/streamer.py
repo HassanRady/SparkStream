@@ -14,13 +14,13 @@ import SparkStream.utils as utils
 
 _logger = logging_config.get_logger(__name__)
 
-            # .config("spark.cassandra.connection.host", config.cassandra.CASSANDRA_HOST)\
 
 
 class SparkStreamer(object):
     def __init__(self, ):
         self.__spark = SparkSession.builder.master("local[1]").appName("tweets reader")\
             .config("spark.some.config.option", "some-value")\
+            .config("spark.cassandra.connection.host", os.environ['CASSANDRA_HOST'])\
             .config("spark.streaming.stopGracefullyOnShutdown", "true")\
             .getOrCreate()
         self.__spark.sparkContext.setLogLevel("ERROR")

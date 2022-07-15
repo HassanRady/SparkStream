@@ -1,11 +1,11 @@
 
 # kafka configs
 KAFKA_TOPIC_NAME: tweets_stream
-KAFKA_HOST: broker:9092
+KAFKA_HOST: localhost:9092
 
 # cassandra configs
 CASSANDRA_SPARK_APP_NAME: cassandra reader
-CASSANDRA_HOST: cassandra:9042
+CASSANDRA_HOST: localhost:9042
 CASSANDRA_KEYSPACE: twitter
 CASSANDRA_DUMP_TABLE: raw_tweets
 CASSANDRA_PROCESSED_TABLE: processed_tweets
