@@ -30,12 +30,11 @@ class SparkStreamer(object):
     def _connect_to_kafka_stream(self) -> dataframe:
         """reading stream from kafka"""
 
-
         df = self.__spark \
             .readStream \
             .format("kafka") \
             .option("kafka.bootstrap.servers", os.environ['KAFKA_HOST']) \
-            .option("subscribe", config.kafka.KAFKA_TOPIC_NAME) \
+            .option("subscribe", os.environ['KAFKA_TOPIC']) \
             .option('failOnDataLoss', 'false') \
             .load()
 
@@ -56,21 +55,6 @@ class SparkStreamer(object):
         return df
 
     @utils.clean_query_name
-    def write_stream_to_memory(self, df, topic):
-        """writing the tweets stream to memory"""
-        self.topic = topic
-
-
-        stream = df.writeStream \
-            .trigger(processingTime='2 seconds') \
-            .option("truncate", "false") \
-            .format('memory') \
-            .outputMode("append") \
-            .queryName(f"""{self.topic}""") \
-            .start()
-        return stream
-
-    @utils.clean_query_name
     def write_stream_to_console(self, df, topic):
         """writing the tweets stream to console"""
         self.topic = topic
@@ -83,7 +67,7 @@ class SparkStreamer(object):
             .start()
         return stream
 
-    def write_stream_to_cassandra(self, df, keyspace=config.cassandra.CASSANDRA_KEYSPACE, table=config.cassandra.CASSANDRA_DUMP_TABLE,):
+    def write_stream_to_cassandra(self, df,):
         """writing the tweets stream to cassandra"""
 
         checkpoint_dir = tempfile.mkdtemp(dir='checkpoints/', prefix='cassandra')
@@ -93,17 +77,11 @@ class SparkStreamer(object):
 
         df.writeStream\
             .format("org.apache.spark.sql.cassandra") \
-            .options(table=table, keyspace=keyspace) \
+            .options(table=os.environ['CASSANDRA_TABLE'], keyspace=os.environ['CASSANDRA_KEYSPACE']) \
             .option("checkpointLocation", checkpoint_dir) \
             .start()
 
         return df
-
-    def get_stream_data_from_memory(self, topic,):
-        """getting the tweets stream data"""
-        pdf = self.__spark.sql(f"""select * from {self.topic}""")
-
-        return pdf
 
     def clean_stream_data(self, df):
         """cleaning the tweets stream data"""
@@ -130,20 +108,15 @@ class SparkClient:
 
         self.console_stream = self.spark_streamer.write_stream_to_console(df, topic=topic)
 
-        # self.memory_stream = self.spark_streamer.write_stream_to_memory(df, topic=topic)
         # self.cassandra_stream = self.spark_streamer.write_stream_to_cassandra(
         #     df, table=config.cassandra.CASSANDRA_OFFLINE_TABLE)
 
     def stop_spark_stream(self):
         try:
             self.console_stream.stop()
-            # self.memory_stream.stop()
             # self.cassandra_stream.stop()
         except BaseException as e:
             _logger.warning(f"Error: {e}")
-
-    def get_stream_data(self, ):
-        return self.spark_streamer.get_stream_data_from_memory(self.topic)
 
 
 if __name__ == '__main__':
