@@ -6,7 +6,6 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, lit
 from pyspark.sql.types import StringType, StructType, StructField
 
-from SparkStream.Config.core import config
 from SparkStream.Config import logging_config
 from SparkStream.Text import text_cleaner as tc
 

@@ -5,11 +5,8 @@ awscli
 flake8
 pathlib2
 PyArrow
-langid
 nltk
 pandas
 pyspark==3.2.0
-pydantic
-strictyaml
 joblib
 findspark

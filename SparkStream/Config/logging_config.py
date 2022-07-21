@@ -2,8 +2,10 @@ import logging
 from logging import handlers
 import sys
 import os
+import SparkStream
+from pathlib import Path
 
-from SparkStream.Config.core import PACKAGE_ROOT
+PACKAGE_ROOT = Path(SparkStream.__file__).resolve().parent
 
 FORMATTER = logging.Formatter(
     "%(asctime)s — %(name)s — %(levelname)s — %(funcName)s:%(lineno)d — %(message)s"

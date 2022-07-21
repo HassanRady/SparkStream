@@ -1,6 +1,5 @@
 from nltk.stem.wordnet import WordNetLemmatizer
 from nltk import pos_tag
-import langid
 import string
 import re
 
@@ -82,20 +81,6 @@ class TextCleaner:
     def check_blanks(self, data_str):
         is_blank = str(data_str.isspace())
         return is_blank
-
-    # check the language (only apply to english)
-    @classmethod
-    def check_lang(self, data_str):
-        from langid.langid import LanguageIdentifier, model
-        identifier = LanguageIdentifier.from_modelstring(model, norm_probs=True)
-        predict_lang = identifier.classify(data_str)
-
-        if predict_lang[1] >= .9:
-            language = predict_lang[0]
-        else:
-            language = predict_lang[0]
-        return language
-
 
     # @classmethod
     # def remove_stopwords(self, df, col_in, col_out):
