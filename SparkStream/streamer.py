@@ -68,7 +68,7 @@ class SparkStreamer(object):
 
     def write_stream_to_cassandra(self, df,):
         """writing the tweets stream to cassandra"""
-
+        os.mkdir("checkpoints")
         checkpoint_dir = tempfile.mkdtemp(dir='checkpoints/', prefix='cassandra')
 
         df = df.alias('other')
