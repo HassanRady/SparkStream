@@ -82,6 +82,24 @@ class SparkStreamer(object):
 
         return df
 
+    def write_stream_to_redis(self, df,):
+        os.mkdir("checkpoints")
+        checkpoint_dir = tempfile.mkdtemp(dir='checkpoints/', prefix='redis')
+
+        df = df.alias('other')
+        df = df.withColumn('id', F.expr("uuid()"))
+
+        df.writeStream\
+            .format("org.apache.spark.sql.redis") \
+            .option("table", os.environ['REDIS_TABLE']) \
+            .option("key.column", "id") \
+            .option("checkpointLocation", checkpoint_dir) \
+            .start()
+
+        return df
+
+
+
     def clean_stream_data(self, df):
         """cleaning the tweets stream data"""
         df = df.withColumn('text', tc.remove_features_udf(df['text']))
@@ -110,10 +128,13 @@ class SparkClient:
         self.cassandra_stream = self.spark_streamer.write_stream_to_cassandra(
             df, )
 
+        self.redis_stream = self.spark_streamer.write_stream_to_redis(df)
+
     def stop_spark_stream(self):
         try:
             # self.console_stream.stop()
             self.cassandra_stream.stop()
+            self.redis_stream.stop()
         except BaseException as e:
             _logger.warning(f"Error: {e}")
 
