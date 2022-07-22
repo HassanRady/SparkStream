@@ -105,15 +105,15 @@ class SparkClient:
 
         df = self.spark_streamer.clean_stream_data(df)
 
-        self.console_stream = self.spark_streamer.write_stream_to_console(df, topic=topic)
+        # self.console_stream = self.spark_streamer.write_stream_to_console(df, topic=topic)
 
-        # self.cassandra_stream = self.spark_streamer.write_stream_to_cassandra(
-        #     df, table=config.cassandra.CASSANDRA_OFFLINE_TABLE)
+        self.cassandra_stream = self.spark_streamer.write_stream_to_cassandra(
+            df, )
 
     def stop_spark_stream(self):
         try:
-            self.console_stream.stop()
-            # self.cassandra_stream.stop()
+            # self.console_stream.stop()
+            self.cassandra_stream.stop()
         except BaseException as e:
             _logger.warning(f"Error: {e}")
 
