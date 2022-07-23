@@ -20,6 +20,8 @@ class SparkStreamer(object):
         self.__spark = SparkSession.builder.master("local[1]").appName("tweets reader")\
             .config("spark.some.config.option", "some-value")\
             .config("spark.cassandra.connection.host", os.environ['CASSANDRA_HOST'])\
+            .config("spark.redis.host", os.environ['REDIS_HOST'])\
+            .config("spark.redis.port", os.environ['REDIS_PORT'])\
             .config("spark.streaming.stopGracefullyOnShutdown", "true")\
             .getOrCreate()
         self.__spark.sparkContext.setLogLevel("ERROR")
@@ -68,7 +70,7 @@ class SparkStreamer(object):
 
     def write_stream_to_cassandra(self, df,):
         """writing the tweets stream to cassandra"""
-        os.mkdir("checkpoints")
+        # os.mkdir("checkpoints")
         checkpoint_dir = tempfile.mkdtemp(dir='checkpoints/', prefix='cassandra')
 
         df = df.alias('other')
@@ -83,17 +85,23 @@ class SparkStreamer(object):
         return df
 
     def write_stream_to_redis(self, df,):
-        os.mkdir("checkpoints")
+        # os.mkdir("checkpoints")
         checkpoint_dir = tempfile.mkdtemp(dir='checkpoints/', prefix='redis')
 
         df = df.alias('other')
         df = df.withColumn('id', F.expr("uuid()"))
 
+        def foreach_func(df, id):
+            df.write.format("org.apache.spark.sql.redis") \
+                .option("table", os.environ['REDIS_TABLE']) \
+                .option("key.column", "id") \
+                .mode("append") \
+                .save()
+
         df.writeStream\
-            .format("org.apache.spark.sql.redis") \
-            .option("table", os.environ['REDIS_TABLE']) \
-            .option("key.column", "id") \
+            .foreachBatch(foreach_func) \
             .option("checkpointLocation", checkpoint_dir) \
+            .outputMode("append") \
             .start()
 
         return df

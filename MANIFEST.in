@@ -12,6 +12,7 @@ include SparkStream/config.yml
 include SparkStream/VERSION
 include SparkStream/Text/*
 include SparkStream/Config/*
+include spark-redis_2.12-3.1.0-jar-with-dependencies.jar
 
 
 
