@@ -13,7 +13,8 @@ import SparkStream.utils as utils
 
 _logger = logging_config.get_logger(__name__)
 
-
+if not os.path.exists("checkpoints"):
+    os.mkdir("checkpoints")
 
 class SparkStreamer(object):
     def __init__(self, ):
@@ -70,7 +71,7 @@ class SparkStreamer(object):
 
     def write_stream_to_cassandra(self, df,):
         """writing the tweets stream to cassandra"""
-        # os.mkdir("checkpoints")
+
         checkpoint_dir = tempfile.mkdtemp(dir='checkpoints/', prefix='cassandra')
 
         df = df.alias('other')
@@ -85,7 +86,8 @@ class SparkStreamer(object):
         return df
 
     def write_stream_to_redis(self, df,):
-        # os.mkdir("checkpoints")
+        """writing the tweets stream to redis"""
+
         checkpoint_dir = tempfile.mkdtemp(dir='checkpoints/', prefix='redis')
 
         df = df.alias('other')
