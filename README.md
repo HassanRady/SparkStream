@@ -13,3 +13,9 @@ The stream processing is done by the following steps:
 
 ## How to use it?
 Use its API: <a href="https://github.com/HassanRady/Spark-Stream-Api">SparkStream-API github</a>
+
+## Dependency
+The package requires the following dependency:
+- spark-redis_2.12-3.1.0-jar-with-dependencies.jar (<a href="https://mvnrepository.com/artifact/com.redislabs/spark-redis_2.12/3.1.0">mvn Repository</a>)
+
+Its so to be able to write data into redis.
