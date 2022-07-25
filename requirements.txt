@@ -1,16 +1,7 @@
-click
-Sphinx
-coverage
-awscli
-flake8
-pathlib2
-PyArrow
-nltk
-pandas
+nltk==3.7
 pyspark==3.2.0
-joblib
-findspark
-python-dotenv
+numpy==1.23.1
+python-dotenv==0.20.0
 
 
 # uvicorn==0.17.6

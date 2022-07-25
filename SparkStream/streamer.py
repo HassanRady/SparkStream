@@ -3,13 +3,11 @@ import os
 
 from pyspark.sql import dataframe, functions as F
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, lit
+from pyspark.sql.functions import col
 from pyspark.sql.types import StringType, StructType, StructField
 
 from SparkStream.Config import logging_config
 from SparkStream.Text import text_cleaner as tc
-
-import SparkStream.utils as utils
 
 _logger = logging_config.get_logger(__name__)
 
@@ -26,8 +24,6 @@ class SparkStreamer(object):
             .config("spark.streaming.stopGracefullyOnShutdown", "true")\
             .getOrCreate()
         self.__spark.sparkContext.setLogLevel("ERROR")
-        self.topic = None
-
 
     def _connect_to_kafka_stream(self) -> dataframe:
         """reading stream from kafka"""
@@ -55,19 +51,6 @@ class SparkStreamer(object):
             'data')).select("data.*")
 
         return df
-
-    @utils.clean_query_name
-    def write_stream_to_console(self, df, topic):
-        """writing the tweets stream to console"""
-        self.topic = topic
-        stream = df.writeStream \
-            .trigger(processingTime='2 seconds') \
-            .option("truncate", "false") \
-            .format('console') \
-            .outputMode("append") \
-            .queryName(f"""{self.topic}""") \
-            .start()
-        return stream
 
     def write_stream_to_cassandra(self, df,):
         """writing the tweets stream to cassandra"""
@@ -122,18 +105,12 @@ class SparkStreamer(object):
 
 class SparkClient:
     def __init__(self):
-        self.topic = None
         self.spark_streamer = SparkStreamer()
         self.kafka_df = self.spark_streamer._connect_to_kafka_stream()
 
-    def start_spark_stream(self, topic):
-        self.topic = topic
+    def start_spark_stream(self):
 
-        df = self.kafka_df.withColumn('topic', lit(topic))
-
-        df = self.spark_streamer.clean_stream_data(df)
-
-        # self.console_stream = self.spark_streamer.write_stream_to_console(df, topic=topic)
+        df = self.spark_streamer.clean_stream_data(self.kafka_df)
 
         self.cassandra_stream = self.spark_streamer.write_stream_to_cassandra(
             df, )
@@ -142,7 +119,6 @@ class SparkClient:
 
     def stop_spark_stream(self):
         try:
-            # self.console_stream.stop()
             self.cassandra_stream.stop()
             self.redis_stream.stop()
         except BaseException as e:
