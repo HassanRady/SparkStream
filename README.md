@@ -19,3 +19,15 @@ The package requires the following dependency:
 - spark-redis_2.12-3.1.0-jar-with-dependencies.jar (<a href="https://mvnrepository.com/artifact/com.redislabs/spark-redis_2.12/3.1.0">mvn Repository</a>)
 
 Its so to be able to write data into redis.
+
+## Environment Variables
+The package requires the following environment variables:
+- `KAFKA_HOST` : The kafka host address
+- `KAFKA_TOPIC` : The kafka topic to listen to
+- `CASSANDRA_HOST` : The cassandra host address
+- `CASSANDRA_KEYSPACE` : The cassandra keyspace to use
+- `CASSANDRA_TABLE` : The cassandra table to write to
+- `REDIS_HOST` : The redis host address
+- `REDIS_PORT` : The redis port
+- `REDIS_TABLE` : The redis table to write to
+
