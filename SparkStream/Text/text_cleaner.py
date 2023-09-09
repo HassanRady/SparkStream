@@ -1,3 +1,4 @@
+import nltk
 from nltk.stem.wordnet import WordNetLemmatizer
 from nltk import pos_tag
 import string
@@ -7,22 +8,22 @@ from pyspark.ml.feature import StopWordsRemover
 from pyspark.sql.functions import udf
 from pyspark.sql.types import StringType
 
+nltk.download('wordnet')
+nltk.download("stopwords")
+
 class TextCleaner:
 
     # remove irrelevant features
     @classmethod
-    def remove_features(self, data_str):
+    def remove_features(cls, data_str):
         # compile regex
         url_re = re.compile('https?://(www.)?\w+\.\w+(/\w+)*/?')
-        punc_re = re.compile('[%s]' % re.escape(string.punctuation))
+        punc_re = re.compile(f'[{re.escape(string.punctuation)}]')
         num_re = re.compile('(\\d+)')
         mention_re = re.compile('@(\w+)')
         alpha_num_re = re.compile("^[a-z0-9_.]+$")
-        retweet_re = re.compile('^RT')
         # convert to lowercase
         data_str = data_str.lower()
-        # remove RT
-        data_str = retweet_re.sub('', data_str)
         # remove hyperlinks
         data_str = url_re.sub('', data_str)
         # remove @mentions
@@ -31,23 +32,15 @@ class TextCleaner:
         data_str = punc_re.sub('', data_str)
         # remove numeric 'words'
         data_str = num_re.sub('', data_str)
-        # remove non a-z 0-9 characters and words shorter than 3 characters
-        list_pos = 0
         cleaned_str = ''
-        for word in data_str.split():
-            if list_pos == 0:
-                if alpha_num_re.match(word) and len(word) > 2:
-                    cleaned_str = word
-            else:
-                if alpha_num_re.match(word) and len(word) > 2:
-                    cleaned_str = cleaned_str + ' ' + word
-
-            list_pos += 1
+        for list_pos, word in enumerate(data_str.split()):
+            if alpha_num_re.match(word) and len(word) > 2:
+                cleaned_str = word if list_pos == 0 else f'{cleaned_str} {word}'
         return cleaned_str
 
     # fixed abbreviation
     @classmethod
-    def fix_abbreviation(self, data_str):
+    def fix_abbreviation(cls, data_str):
         data_str = data_str.lower()
         data_str = re.sub(r'\bthats\b', 'that is', data_str)
         data_str = re.sub(r'\bive\b', 'i have', data_str)
@@ -71,14 +64,14 @@ class TextCleaner:
 
     # remove non ASCII characters
     @classmethod
-    def strip_non_ascii(self, data_str):
+    def strip_non_ascii(cls, data_str):
         ''' Returns the string without non ASCII characters'''
         stripped = (c for c in data_str if 0 < ord(c) < 127)
         return ''.join(stripped)
 
     # check to see if a row only contains whitespace
     @classmethod
-    def check_blanks(self, data_str):
+    def check_blanks(cls, data_str):
         is_blank = str(data_str.isspace())
         return is_blank
 
@@ -90,7 +83,7 @@ class TextCleaner:
     #     return remover.transform(df)
 
     @classmethod
-    def remove_stopwords(self, data_str):
+    def remove_stopwords(cls, data_str):
         from nltk.corpus import stopwords
         stop_words = set(stopwords.words('english'))
         word_list = data_str.split()
@@ -102,7 +95,7 @@ class TextCleaner:
 
     # Part-of-Speech Tagging
     @classmethod
-    def tag_and_remove(self, data_str):
+    def tag_and_remove(cls, data_str):
         cleaned_str = ' '
         # noun tags
         nn_tags = ['NN', 'NNP', 'NNP', 'NNPS', 'NNS']
@@ -125,7 +118,7 @@ class TextCleaner:
 
     # lemmatization
     @classmethod
-    def lemmatize(self, data_str):
+    def lemmatize(cls, data_str):
         # expects a string
         list_pos = 0
         cleaned_str = ''
