@@ -8,7 +8,6 @@ recursive-exclude * *.py[co]
 recursive-include docs *.rst conf.py Makefile make.bat *.jpg *.png *.gif
 
 include requirements.txt
-include SparkStream/config.yml
 include SparkStream/VERSION
 include SparkStream/Text/*
 include SparkStream/Config/*

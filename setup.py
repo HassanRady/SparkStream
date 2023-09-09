@@ -57,7 +57,7 @@ setup(
     ],
     license="MIT license",
     include_package_data=True,
-    keywords='Tweets',
+    keywords='spark streaming',
     packages=find_packages(include=[NAME, NAME + '.*']),
     test_suite='tests',
     tests_require=test_requirements,
