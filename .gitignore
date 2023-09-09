@@ -190,11 +190,11 @@ cython_debug/
 # Ignore code-workspaces
 *.code-workspace
 
-test.py
 *.log
 logs.*
 checkpoints/
-app.py
-run.sh
 pantheon.tsv
-# End of https://www.toptal.com/developers/gitignore/api/python,visualstudiocode
+
+*.env
+
+tmp.py
