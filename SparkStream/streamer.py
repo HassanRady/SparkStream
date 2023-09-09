@@ -27,7 +27,7 @@ class SparkStreamer(object):
             .getOrCreate()
         self.__spark.sparkContext.setLogLevel("ERROR")
 
-    def _connect_to_kafka_stream(self):
+    def read_kafka_stream(self):
         df = self.__spark \
             .readStream \
             .format("kafka") \
@@ -113,7 +113,7 @@ class SparkStreamer(object):
 class SparkClient:
     def __init__(self):
         self.spark_streamer = SparkStreamer()
-        self.kafka_df = self.spark_streamer._connect_to_kafka_stream()
+        self.kafka_df = self.spark_streamer.read_kafka_stream()
 
     def start_spark_stream(self):
 
