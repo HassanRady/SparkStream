@@ -1,9 +1,4 @@
 nltk==3.7
 pyspark==3.2.0
 numpy==1.23.1
-python-dotenv==0.20.0
 pydantic_settings==2.0.3
-
-
-# uvicorn==0.17.6
-# fastapi==0.78.0
