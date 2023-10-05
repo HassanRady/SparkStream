@@ -5,7 +5,7 @@ from functools import lru_cache
 class Settings(BaseSettings):
     APP_NAME: str
     KAFKA_BOOTSTRAP_SERVERS: str
-    KAFKA_RAW_TEXT_TOPIC: str
+    KAFKA_STREAM_TEXT_TOPIC: str
     KAFKA_CLEANED_TEXT_TOPIC: str
     # REDIS_HOST: str
     # REDIS_PORT: str

@@ -32,7 +32,7 @@ class SparkStreamer(object):
             .readStream \
             .format("kafka") \
             .option("kafka.bootstrap.servers", settings.KAFKA_BOOTSTRAP_SERVERS) \
-            .option("subscribe", settings.KAFKA_RAW_TEXT_TOPIC) \
+            .option("subscribe", settings.KAFKA_STREAM_TEXT_TOPIC) \
             .option('failOnDataLoss', 'false') \
             .option("startingOffsets", "latest") \
             .load()
