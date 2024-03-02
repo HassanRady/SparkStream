@@ -1,9 +1,8 @@
-
 from pyspark.sql.functions import split, explode
 
-class TextAnalyzer:
 
-    def get_word_count(self, df, col_name='lemm_text'):
+class TextAnalyzer:
+    def get_word_count(self, df, col_name="lemm_text"):
         """Creates a DataFrame with word counts.
 
         Args:
@@ -12,8 +11,8 @@ class TextAnalyzer:
         Returns:
             DataFrame of (str, int): A DataFrame containing 'word' and 'count' columns.
         """
-        df = df.select(split(df[col_name], '\s+').alias('split'))
-        df_single = df.select(explode(df.split).alias('word'))
-        df_single = df_single.where(df_single.word != '')
+        df = df.select(split(df[col_name], "\s+").alias("split"))
+        df_single = df.select(explode(df.split).alias("word"))
+        df_single = df_single.where(df_single.word != "")
 
-        return df_single.groupBy('word').count()
+        return df_single.groupBy("word").count()

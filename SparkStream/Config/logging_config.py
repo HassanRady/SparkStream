@@ -23,14 +23,14 @@ def get_file_handler():
     file_handler.setFormatter(FORMATTER)
     return file_handler
 
+
 def get_socket_handler():
-    socket_handler = handlers.SocketHandler(host='localhost', port=9999)
+    socket_handler = handlers.SocketHandler(host="localhost", port=9999)
     socket_handler.setFormatter(FORMATTER)
     return socket_handler
 
 
 def get_logger(logger_name):
-
     logger = logging.getLogger(logger_name)
     logger.setLevel(logging.DEBUG)
     logger.addHandler(get_file_handler())
