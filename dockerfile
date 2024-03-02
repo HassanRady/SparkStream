@@ -8,7 +8,7 @@ RUN apt install -y python3-pip
 RUN apt install default-jre-headless -y
 
 
-COPY SparkStream .
+COPY SparkStream SparkStream
 
 COPY requirements.txt .
 

@@ -4,70 +4,69 @@ from nltk import pos_tag
 import string
 import re
 
-from pyspark.ml.feature import StopWordsRemover 
 from pyspark.sql.functions import udf
 from pyspark.sql.types import StringType
 
-nltk.download('wordnet')
+nltk.download("wordnet")
 nltk.download("stopwords")
 
-class TextCleaner:
 
+class TextCleaner:
     # remove irrelevant features
     @classmethod
     def remove_features(cls, data_str):
         # compile regex
-        url_re = re.compile('https?://(www.)?\w+\.\w+(/\w+)*/?')
-        punc_re = re.compile(f'[{re.escape(string.punctuation)}]')
-        num_re = re.compile('(\\d+)')
-        mention_re = re.compile('@(\w+)')
+        url_re = re.compile("https?://(www.)?\w+\.\w+(/\w+)*/?")
+        punc_re = re.compile(f"[{re.escape(string.punctuation)}]")
+        num_re = re.compile("(\\d+)")
+        mention_re = re.compile("@(\w+)")
         alpha_num_re = re.compile("^[a-z0-9_.]+$")
         # convert to lowercase
         data_str = data_str.lower()
         # remove hyperlinks
-        data_str = url_re.sub('', data_str)
+        data_str = url_re.sub("", data_str)
         # remove @mentions
-        data_str = mention_re.sub('', data_str)
+        data_str = mention_re.sub("", data_str)
         # remove puncuation
-        data_str = punc_re.sub('', data_str)
+        data_str = punc_re.sub("", data_str)
         # remove numeric 'words'
-        data_str = num_re.sub('', data_str)
-        cleaned_str = ''
+        data_str = num_re.sub("", data_str)
+        cleaned_str = ""
         for list_pos, word in enumerate(data_str.split()):
             if alpha_num_re.match(word) and len(word) > 2:
-                cleaned_str = word if list_pos == 0 else f'{cleaned_str} {word}'
+                cleaned_str = word if list_pos == 0 else f"{cleaned_str} {word}"
         return cleaned_str
 
     # fixed abbreviation
     @classmethod
     def fix_abbreviation(cls, data_str):
         data_str = data_str.lower()
-        data_str = re.sub(r'\bthats\b', 'that is', data_str)
-        data_str = re.sub(r'\bive\b', 'i have', data_str)
-        data_str = re.sub(r'\bim\b', 'i am', data_str)
-        data_str = re.sub(r'\bya\b', 'yeah', data_str)
-        data_str = re.sub(r'\bcant\b', 'can not', data_str)
-        data_str = re.sub(r'\bdont\b', 'do not', data_str)
-        data_str = re.sub(r'\bwont\b', 'will not', data_str)
-        data_str = re.sub(r'\bid\b', 'i would', data_str)
-        data_str = re.sub(r'wtf', 'what the fuck', data_str)
-        data_str = re.sub(r'\bwth\b', 'what the hell', data_str)
-        data_str = re.sub(r'\br\b', 'are', data_str)
-        data_str = re.sub(r'\bu\b', 'you', data_str)
-        data_str = re.sub(r'\bk\b', 'OK', data_str)
-        data_str = re.sub(r'\bsux\b', 'sucks', data_str)
-        data_str = re.sub(r'\bno+\b', 'no', data_str)
-        data_str = re.sub(r'\bcoo+\b', 'cool', data_str)
-        data_str = re.sub(r'rt\b', '', data_str)
+        data_str = re.sub(r"\bthats\b", "that is", data_str)
+        data_str = re.sub(r"\bive\b", "i have", data_str)
+        data_str = re.sub(r"\bim\b", "i am", data_str)
+        data_str = re.sub(r"\bya\b", "yeah", data_str)
+        data_str = re.sub(r"\bcant\b", "can not", data_str)
+        data_str = re.sub(r"\bdont\b", "do not", data_str)
+        data_str = re.sub(r"\bwont\b", "will not", data_str)
+        data_str = re.sub(r"\bid\b", "i would", data_str)
+        data_str = re.sub(r"wtf", "what the fuck", data_str)
+        data_str = re.sub(r"\bwth\b", "what the hell", data_str)
+        data_str = re.sub(r"\br\b", "are", data_str)
+        data_str = re.sub(r"\bu\b", "you", data_str)
+        data_str = re.sub(r"\bk\b", "OK", data_str)
+        data_str = re.sub(r"\bsux\b", "sucks", data_str)
+        data_str = re.sub(r"\bno+\b", "no", data_str)
+        data_str = re.sub(r"\bcoo+\b", "cool", data_str)
+        data_str = re.sub(r"rt\b", "", data_str)
         data_str = data_str.strip()
         return data_str
 
     # remove non ASCII characters
     @classmethod
     def strip_non_ascii(cls, data_str):
-        ''' Returns the string without non ASCII characters'''
+        """Returns the string without non ASCII characters"""
         stripped = (c for c in data_str if 0 < ord(c) < 127)
-        return ''.join(stripped)
+        return "".join(stripped)
 
     # check to see if a row only contains whitespace
     @classmethod
@@ -85,24 +84,22 @@ class TextCleaner:
     @classmethod
     def remove_stopwords(cls, data_str):
         from nltk.corpus import stopwords
-        stop_words = set(stopwords.words('english'))
+
+        stop_words = set(stopwords.words("english"))
         word_list = data_str.split()
-        filtered_words = [w for w in word_list if not w in stop_words]
-        return ' '.join(filtered_words)
-
-
-
+        filtered_words = [w for w in word_list if w not in stop_words]
+        return " ".join(filtered_words)
 
     # Part-of-Speech Tagging
     @classmethod
     def tag_and_remove(cls, data_str):
-        cleaned_str = ' '
+        cleaned_str = " "
         # noun tags
-        nn_tags = ['NN', 'NNP', 'NNP', 'NNPS', 'NNS']
+        nn_tags = ["NN", "NNP", "NNP", "NNPS", "NNS"]
         # adjectives
-        jj_tags = ['JJ', 'JJR', 'JJS']
+        jj_tags = ["JJ", "JJR", "JJS"]
         # verbs
-        vb_tags = ['VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ']
+        vb_tags = ["VB", "VBD", "VBG", "VBN", "VBP", "VBZ"]
         nltk_tags = nn_tags + jj_tags + vb_tags
 
         # break string into 'words'
@@ -112,7 +109,7 @@ class TextCleaner:
         tagged_text = pos_tag(text)
         for tagged_word in tagged_text:
             if tagged_word[1] in nltk_tags:
-                cleaned_str += tagged_word[0] + ' '
+                cleaned_str += tagged_word[0] + " "
 
         return cleaned_str
 
@@ -121,27 +118,23 @@ class TextCleaner:
     def lemmatize(cls, data_str):
         # expects a string
         list_pos = 0
-        cleaned_str = ''
+        cleaned_str = ""
         lmtzr = WordNetLemmatizer()
         text = data_str.split()
         tagged_words = pos_tag(text)
         for word in tagged_words:
-            if 'v' in word[1].lower():
-                lemma = lmtzr.lemmatize(word[0], pos='v')
+            if "v" in word[1].lower():
+                lemma = lmtzr.lemmatize(word[0], pos="v")
             else:
-                lemma = lmtzr.lemmatize(word[0], pos='n')
+                lemma = lmtzr.lemmatize(word[0], pos="n")
             if list_pos == 0:
                 cleaned_str = lemma
             else:
-                cleaned_str = cleaned_str + ' ' + lemma
+                cleaned_str = cleaned_str + " " + lemma
             list_pos += 1
         return cleaned_str
 
-
-
-
     ###############################################################################
-
 
 
 strip_non_ascii_udf = udf(TextCleaner.strip_non_ascii, StringType())
